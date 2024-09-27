@@ -269,8 +269,6 @@
 </head>
 
 <body>
-
-
     <h1>tetris</h1>
     <div id="tetris">
         <div id="info">
@@ -299,6 +297,7 @@
     </div>
 
     <script>
+        //fonction qui va contenir le debout du jeux et l objet tetris avec c est propriete
         (function () {
             var isStart = false;
             var tetris = {
@@ -380,6 +379,7 @@
                 sTimer: null,
                 speed: 700,
                 lines: 0,
+                isPause: false,
 
 
                 init: function () {
@@ -531,64 +531,75 @@
                     this.curX = x;
                     this.curY = y;
                 },
+                //fonction qui se occupe de touche pour bouge le piece de tetris 
                 bindKeyEvents: function () {
                     var me = this;
                     var event = "keypress";
+
+                    // Détecte le type d'événement à utiliser en fonction du navigateur
                     if (this.isSafari() || this.isIE()) {
-                        event = "keydown";
+                        event = "keydown"; // Safari et IE utilisent "keydown"
                     }
+
                     var cb = function (e) {
-                        me.handleKey(e);
+                        me.handleKey(e); // L'appel de la fonction handleKey sur chaque événement
                     };
+
+                    // Attache l'événement en utilisant la méthode appropriée en fonction de la compatibilité
                     if (window.addEventListener) {
                         document.addEventListener(event, cb, false);
                     } else {
                         document.attachEvent("on" + event, cb);
                     }
                 },
+
+                // Fonction pour déplacer la pièce en fonction de la touche appuyée
                 handleKey: function (e) {
-                    var c = this.whichKey(e);
-                    var dir = "";
-                    switch (c) {
-                        case 37:
-                            this.move("L");
+                    var key = this.whichKey(e); // Récupère le code de la touche
+                    switch (key) {
+                        case 37: // Flèche gauche
+                            this.move("L"); // Déplacer à gauche
                             break;
-                        case 38:
-                            this.move("RT");
+                        case 38: // Flèche haut
+                            this.move("RT"); // Rotation de la pièce
                             break;
-                        case 39:
-                            this.move("R");
+                        case 39: // Flèche droite
+                            this.move("R"); // Déplacer à droite
                             break;
-                        case 40:
-                            this.move("D");
+                        case 40: // Flèche bas
+                            this.move("D"); // Accélérer la descente
                             break;
-                        case 27: //esc: pause
-                            this.togglePause();
+                        case 27: // Échap
+                            this.togglePause(); // Mettre en pause le jeu
                             break;
                         default:
+                            // Aucune action si la touche n'est pas reconnue
                             break;
                     }
                 },
 
-
-
+                // Récupère le code de la touche en fonction de l'événement
                 whichKey: function (e) {
-                    var c;
+                    var keyCode;
+                    // Détecte le code de la touche pour les anciens navigateurs (window.event)
                     if (window.event) {
-                        c = window.event.keyCode;
+                        keyCode = window.event.keyCode;
                     } else if (e) {
-                        c = e.keyCode;
+                        keyCode = e.keyCode; // Modern browsers
                     }
-                    return c;
+                    return keyCode;
                 },
+                //fonction incremente le time 
                 incTime: function () {
                     this.time++;
                     this.setInfo("time");
                 },
+                //fonction pour incremente le score 
                 incScore: function (amount) {
                     this.score = this.score + amount;
                     this.setInfo("score");
                 },
+                //fonction pour incremente le level
                 incLevel: function () {
                     this.level++;
                     this.speed = this.speed - 75;
@@ -598,6 +609,7 @@
                     this.lines += num;
                     this.setInfo("lines");
                 },
+                //fonction pour calculer le score de joeur 
                 calcScore: function (args) {
                     var lines = args.lines || 0;
                     var shape = args.shape || false;
@@ -614,16 +626,19 @@
                     /*if (speed > 0){ score += speed * this["level" +this .level[3]];}*/
                     this.incScore(score);
                 },
+                //fonction pour checkscore 
                 checkScore: function () {
                     if (this.score >= this["level" + this.level][0]) {
                         this.incLevel();
                     }
                 },
+                //fonction pour affiche game over quand le jouer perd 
                 gameOver: function () {
                     this.clearTimers();
                     isStart = false;
                     this.canvas.innerHTML = "<h1>GAME OVER</h1>";
                 },
+                //fonction pout joue au jeux 
                 play: function () {
                     var me = this;
                     if (this.timer === null) {
@@ -648,12 +663,15 @@
                     this.pTimer = setTimeout(gameLoop, me.speed);
                     this.isActive = 1;
                 },
-                //fonction pour mettre en pause le jeux 
+                //fonction pour mettre en pause le jeux si la conditio du jeux 
                 togglePause: function () {
-                    console.log("Bouton pause cliqué"); // Debuggin
-                    //ca verifie si le jeux est actve
-                    if (this.isActive === 1) {
-                        //pour arrete le jeux 
+                    console.log("Bouton pause cliqué");
+                    // Bascule l'état de pause (true ou false) 
+                    //est mes pause si la condition de pause est a vrai 
+                    this.isPause = !this.isPause;
+                    //si ca c est en pause                     
+                    if (this.isPause) {
+                        //pour arrete le jeux  on utilise
                         this.clearTimers();
                         //indique maintenant que le jeux est en pause                    
                         this.isActive = 0;
@@ -664,11 +682,15 @@
                 },
                 //fonction qui arrete le jeux 
                 clearTimers: function () {
+                    //fonction pour arrete le principale temps 
                     clearTimeout(this.timer);
+                    //fonction pour arrete le deuxieme temps 
                     clearTimeout(this.pTimer);
+                    //variable qui indique le temps principale et deuxieme sont arrete 
                     this.timer = null;
                     this.pTimer = null;
                 },
+                //fonction pour bouge le piece
                 move: function (dir) {
                     var s = "";
                     var me = this;
@@ -902,6 +924,7 @@
                 }
             });
         })();
+
 
         // Ajout des contrôles pour les boutons pour le mouvement de block
         const keyLeft = document.querySelector("#left");
