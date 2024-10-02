@@ -538,25 +538,38 @@
                         this.curX = x;
                         this.curY = y;
                     },
-                    //fonction qui se occupe de touche pour bouge le piece de tetris 
                     bindKeyEvents: function () {
+                        console.log("evenement de touche de clavier ");
                         var me = this;
-                        var event = "keypress";
-                        // Détecte le type d'événement à utiliser en fonction du navigateur
-                        if (this.isSafari() || this.isIE()) {
-                            event = "keydown"; // Safari et IE utilisent "keydown"
-                        }
-                        var cb = function (e) {
-                            me.handleKey(e); // L'appel de la fonction handleKey sur chaque événement
+
+                        // Fonction de gestion pour le clavier et les boutons HTML
+                        var cb = function (keyCode) {
+                            me.handleKey({ keyCode: keyCode });  // Simule un événement clavier avec le code de touche correspondant
                         };
-                        // Attache l'événement en utilisant la méthode appropriée en fonction de la compatibilité
+                        // Gestion des événements de clavier
+                        var event = "keydown";  // Utiliser "keydown" pour les événements clavier par défaut
+                        var keyboardHandler = function (e) {
+                            me.handleKey(e);
+                        };
+                        //verifie si la fentre a ajoute l evenement pour le clique 
                         if (window.addEventListener) {
-                            document.addEventListener(event, cb, false);
+                            document.addEventListener(event, keyboardHandler, false);
                         } else {
-                            document.attachEvent("on" + event, cb);
+                            //sinon il ya pas de evenement 
+                            document.attachEvent("on" + event, keyboardHandler);
                         }
+
+                        // Gestion des clics sur les boutons HTML
+                        var buttons = document.querySelectorAll("#keyboard button");  // Sélectionne tous les boutons du div #keyboard
+                        buttons.forEach(function (button) {
+                            button.addEventListener("click", function () {
+                                var keyCode = parseInt(button.getAttribute("data-key"), 10);  // Récupère le code de la touche à partir de l'attribut data-key
+                                cb(keyCode);  // Appelle la fonction de gestion avec le code de touche récupéré
+                            });
+                        });
                     },
                     handleKey: function (e) {
+                        console.log("mouvement de touche pour le jeux ");
                         var key = this.whichKey(e); // Récupère le code de la touche
 
                         // Flèche gauche
@@ -584,9 +597,11 @@
 
                     // Récupère le code de la touche en fonction de l'événement
                     whichKey: function (e) {
+                        console.log("mouvemente de detection de touche de clavier ");
                         var keyCode;
-                        // Détecte le code de la touche pour les anciens navigateurs (window.event)
+                        // Détecte le code de la touche sur le navigateur 
                         if (window.event) {
+                            //aggiunge l evento 
                             keyCode = window.event.keyCode;
                         } else if (e) {
                             keyCode = e.keyCode; // Modern browsers
@@ -595,20 +610,30 @@
                     },
                     //fonction incremente le time 
                     incTime: function () {
+                        //questo per l incrementazione del tempo
                         this.time++;
+                        //questo serve ad accedere all informazione sul tempo
                         this.setInfo("time");
                     },
                     //fonction pour incremente le score 
                     incScore: function (amount) {
+                        // // Incrementa il punteggio attuale con l'ammontare fornito come parametro
                         this.score = this.score + amount;
+                        // Aggiorna l'interfaccia grafica per mostrare il punteggio aggiornato
                         this.setInfo("score");
                     },
-                    //fonction pour incremente le level
+                    //fonction pour incrementare il livello del gioco 
                     incLevel: function () {
-                        this.level++;
-                        this.speed = this.speed - 75;
-                        this.setInfo("level");
+                        // se questo livello e incrementato 
+                        if (this.level++) {
+
+                            //questa velocita sara -85
+                            this.speed = this.speed - 85;
+                            //e si accedere a livello all informazione presente nel level 
+                            this.setInfo("level");
+                        }
                     },
+                    //funzione per incrementare la linea 
                     incLines: function (num) {
                         this.lines += num;
                         this.setInfo("lines");
@@ -643,6 +668,7 @@
                     },
                     //fonction pout joue au jeux 
                     play: function () {
+                        console.log("intialisazione del gioco");
                         var me = this;
                         if (this.timer === null) {
                             this.initTimer();
@@ -695,6 +721,7 @@
                     },
                     //fonction pour bouge le piece
                     move: function (dir) {
+                        console.log("deplacement de bloc de tetris pour le jeux ");
                         var s = "";
                         var me = this;
                         var tempX = this.curX;
@@ -736,7 +763,9 @@
                             this.curComplete = true;
                         }
                     },
+
                     rotate: function () {
+                        console.log("rotation de bloc de tetris");
                         if (this.curShapeIndex !== 6) {
                             //square
                             var temp = [];
@@ -934,19 +963,19 @@
             const keyPause = document.querySelector("#Pause");
             // Ajouter les événements de click aux boutons
             keyLeft.addEventListener("click", function () {
-                tetris.handleKey({ c: 37 }); // Simule la touche flèche gauche
+                tetris.handleKey({ e: 37 }); // Simule la touche flèche gauche
             });
             keyright.addEventListener("click", function () {
-                tetris.handleKey({ c: 39 }); // Simule la touche flèche droite
+                tetris.handleKey({ e: 39 }); // Simule la touche flèche droite
             });
             keyRotate.addEventListener("click", function () {
-                tetris.handleKey({ c: 38 }); // Simule la touche flèche haut (rotation)
+                tetris.handleKey({ e: 38 }); // Simule la touche flèche haut (rotation)
             });
             keydown.addEventListener("click", function () {
-                tetris.handleKey({ c: 40 }); // Simule la touche flèche bas
+                tetris.handleKey({ e: 40 }); // Simule la touche flèche bas
             });
             keyPause.addEventListener("click", function () {
-                tetris.handleKey({ keyCode: 27 }); // Simule la touche ESC (pause)
+                tetris.togglePause(); // Simule la touche ESC (pause)
             });
             if (!Array.prototype.eachdo) {
                 Array.prototype.eachdo = function (fn) {
